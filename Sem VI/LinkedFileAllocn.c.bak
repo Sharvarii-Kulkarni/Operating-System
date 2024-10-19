@@ -1,0 +1,132 @@
+Chatgpt
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define MAX_BLOCKS 100
+
+// Node structure for linked list representing disk blocks
+typedef struct Node {
+    int block_number;
+    struct Node *next;
+} Node;
+
+// Function prototypes
+void initialize_disk(Node *disk[], int n);
+void show_bit_vector(Node *disk[], int n);
+void create_new_file(Node *disk[], int n);
+void show_directory(Node *disk[], int n);
+
+int main() {
+    int n;
+    printf("Enter the number of blocks in the disk: ");
+    scanf("%d", &n);
+
+    // Array of pointers to Node for representing disk blocks
+    Node *disk[MAX_BLOCKS];
+
+    initialize_disk(disk, n);
+
+    int choice;
+    do {
+        printf("\nMenu:\n");
+        printf("1. Show Bit Vector\n");
+        printf("2. Create New File\n");
+        printf("3. Show Directory\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch(choice) {
+            case 1:
+                show_bit_vector(disk, n);
+                break;
+            case 2:
+                create_new_file(disk, n);
+                break;
+            case 3:
+                show_directory(disk, n);
+                break;
+            case 4:
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice. Please enter a valid option.\n");
+        }
+    } while(choice != 4);
+
+    // Free allocated memory
+    for (int i = 0; i < n; i++) {
+        Node *current = disk[i];
+        while (current != NULL) {
+            Node *temp = current;
+            current = current->next;
+            free(temp);
+        }
+    }
+
+    return 0;
+}
+
+// Initialize disk with all blocks free
+void initialize_disk(Node *disk[], int n) {
+    for (int i = 0; i < n; i++) {
+        disk[i] = NULL;
+    }
+}
+
+// Display the bit vector representing the disk blocks
+void show_bit_vector(Node *disk[], int n) {
+    printf("Bit Vector:\n");
+    for (int i = 0; i < n; i++) {
+        if (disk[i] == NULL) {
+            printf("0 ");
+        } else {
+            printf("1 ");
+        }
+    }
+    printf("\n");
+}
+
+// Create a new file by marking blocks as allocated
+void create_new_file(Node *disk[], int n) {
+    int start_block, end_block;
+
+    printf("Enter starting block number: ");
+    scanf("%d", &start_block);
+    printf("Enter ending block number: ");
+    scanf("%d", &end_block);
+
+    if (start_block < 0 || start_block >= n || end_block < 0 || end_block >= n || start_block > end_block) {
+        printf("Invalid block numbers. File creation failed.\n");
+        return;
+    }
+
+    for (int i = start_block; i <= end_block; i++) {
+        if (disk[i] != NULL) {
+            printf("Block %d is already allocated. File creation failed.\n", i);
+            return;
+        }
+    }
+
+    // Mark blocks as allocated
+    for (int i = start_block; i <= end_block; i++) {
+        Node *new_block = (Node *)malloc(sizeof(Node));
+        new_block->block_number = i;
+        new_block->next = NULL;
+
+        disk[i] = new_block;
+    }
+
+    printf("File created successfully.\n");
+}
+
+// Display directory (allocated blocks)
+void show_directory(Node *disk[], int n) {
+    printf("Directory:\n");
+    for (int i = 0; i < n; i++) {
+        if (disk[i] != NULL) {
+            printf("Block %d\n", i);
+        }
+    }
+}
